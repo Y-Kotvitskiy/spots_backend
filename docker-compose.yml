@@ -1,22 +1,22 @@
 services:
-  # 1. Ваш Node.js / Express застосунок
   app:
     build:
       context: .
       dockerfile: Dockerfile
     restart: always
     ports:
-      - '3000:3000' # Відкриваємо порт тільки для веб-застосунку
+      - '3001:3001'
     env_file:
       - .env
     depends_on:
       db:
-        condition: service_healthy # Чекаємо повної готовності Postgres
-    # Накатуємо схему бази через Prisma та запускаємо застосунок
+        condition: service_healthy
+    volumes:
+      - .:/app
+    # Перевизначаємо команду саме для режиму розробки з ватчером
     command: >
-      sh -c "npx prisma db push && node ./src/index.js"
+      sh -c "npx prisma db push && node --watch=src/**/*.js src/index.js"
 
-  # 2. Сервіс Бази Даних (PostgreSQL)
   db:
     image: postgres:16-alpine
     restart: always
@@ -27,10 +27,10 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d mydb']
+      test: ['CMD-SHELL', 'pg_isready -U user -d user_app']
       interval: 3s
       timeout: 3s
       retries: 5
 
 volumes:
-  pgdata: # Зберігає дані бази між перезапусками контейнерів
+  pgdata:
