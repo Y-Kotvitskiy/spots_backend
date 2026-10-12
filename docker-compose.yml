@@ -13,6 +13,7 @@ services:
         condition: service_healthy
     volumes:
       - .:/app
+      - /app/node_modules
     # Перевизначаємо команду саме для режиму розробки з ватчером
     command: >
       sh -c "npx prisma db push && node --watch=src/**/*.js src/index.js"
